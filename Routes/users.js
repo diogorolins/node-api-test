@@ -19,8 +19,7 @@ router.post('/', (req, res) => {
 
     users.create(req.body, (err, result) => {
       if (err) return res.send({ error: 'Erro ao cadastrar usuário' });
-      result.password = undefined;ls
-      ls
+      result.password = undefined;
       return res.send(result);
     });
   });
