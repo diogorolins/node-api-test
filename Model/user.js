@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require('../Config/ConnectionFactory');
 const Schema = mongoose.Schema;
 const bcrypt  = require('bcrypt');
 
