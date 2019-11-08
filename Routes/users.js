@@ -3,44 +3,48 @@ const router = express.Router();
 const users = require('../Model/user')
 const bcrypt = require('bcrypt');
 
-router.get('/', (req, res) => {
-  users.find({}, (err, result) => {
-    if(err) return res.send({ error: 'Erro na consulta de usuários'});
-    return res.send(result);
-  });
-});
+router.get('/', async(req, res) => {
+  try{
+      const userList = await users.find({});
+      res.send(userList);
+  } catch(err){
+      return res.send({ error: 'Erro na consulta de usuários' });
+  }
+})
 
-router.post('/', (req, res) => {
-  const {email, password} = req.body;
+
+router.post('/', async(req, res) => {
+  const{email, password} = req.body;
   if (!email || !password) return res.send({ error: 'Dados insufucientes' });
 
-  users.findOne({email}, (err,result) => {
-    if (err) return res.send({ error: 'Erro ao buscar usuário' });
-    if (result) return res.send({ error: 'Usuário já cadastrado' });
+  try{
+    if (await users.findOne({ email })) return res.send({ error: 'Usuário já cadastrado' });
+    const user = await users.create(req.body);
+    user.password = undefined;
+    return res.send(user);
+  } 
+  catch(err){
+    console.log(err);
+    return res.send({ error: 'Erro no cadastro do usuário' });
+  }
 
-    users.create(req.body, (err, result) => {
-      if (err) return res.send({ error: 'Erro ao cadastrar usuário' });
-      result.password = undefined;
-      return res.send(result);
-    });
-  });
 });
 
-router.post('/auth', (req, res) => {
-  const {email, password} = req.body;
+router.post('/auth', async (req, res) => {
+  const { email, password } = req.body;
   if (!email || !password) return res.send({ error: 'Dados insufucientes' });
 
-  users.findOne({ email }, (err, result) => {
-    if (err) return res.send({ error: 'Erro ao buscar usuário' });
-    if (!result) return res.send({ error: 'Usuário não encontrado' });
-
-    bcrypt.compare(password, result.password, (err, same) => {
-      if (!same) return res.send({ error: 'Usuário não autenticado' });
-      result.password = undefined;
-      return res.send(result);
-    });
-
-  }).select('+password');
+  try{
+    const user = await users.findOne({ email }).select('+password');
+    if (!await users.findOne({ email }).select('+password')) return res.send({ error: 'Usuário não encontrado' });
+    if (!await bcrypt.compare(password, user.password)) return res.send({ error: 'Usuário não autenticado' });
+    user.password = undefined;
+    return res.send(user);
+  }
+  catch(err){
+    console.log(err);
+    return res.send({ error: 'Erro na autenticação'});
+  }
 
 });
 

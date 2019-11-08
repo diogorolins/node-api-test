@@ -7,14 +7,14 @@ const userSchema = new Schema({
   password: { type: String, required: true, select: false},
   created: {type: Date, default: Date.now}
 });
-userSchema.pre('save', function(next) {
+
+userSchema.pre('save', async function(next) {
   let user = this;
   if(!user.isModified('password')) return next();
-  
-  bcrypt.hash(user.password, 10, (err,encrypted) => {
-    user.password = encrypted;
-    return next();
-  });
+
+  user.password = await bcrypt.hash(user.password, 10) 
+  return next();
+ 
 });
 
 module.exports = mongoose.model('user', userSchema);
