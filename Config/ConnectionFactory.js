@@ -1,5 +1,7 @@
+require('dotenv/config');
+
 const mongoose = require('mongoose');
-const url = 'mongodb+srv://admin:admin@clusterapi-viwb1.mongodb.net/test?retryWrites=true&w=majority';
+const url = process.env.DB_CONNECTION;
 const options = {
   reconnectTries: Number.MAX_VALUE,
   reconnectInterval: 500,

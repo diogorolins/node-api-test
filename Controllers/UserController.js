@@ -1,3 +1,5 @@
+require('dotenv/config');
+
 const users = require('../Model/user')
 const bcrypt = require('bcrypt'); 
 const jwt = require('jsonwebtoken');
@@ -9,7 +11,7 @@ class UserController{
       console.log('Middlewere token ativado')
       const token_header = req.headers.token;
       if(!token_header) return res.status(401).send({ error: 'Falha na autenticação.'})
-      jwt.verify(token_header, '123456' , (err, decoded) => {
+      jwt.verify(token_header, process.env.TOKEN_PASSWORD , (err, decoded) => {
         if (err) return res.status(401).send({ error: 'Falha na autenticação.'})
         return next();
       });
@@ -17,7 +19,7 @@ class UserController{
   }
 
   createUserToken(userId){
-    return jwt.sign({id: userId}, '123456', { expiresIn: '7d' });
+    return jwt.sign({ id: userId }, process.env.TOKEN_PASSWORD, { expiresIn: '7d' });
   }
 
   listUsers(){
@@ -40,7 +42,7 @@ class UserController{
         if (await users.findOne({ email })) return res.status(400).send({ error: 'Usuário já cadastrado' });
         const user = await users.create(req.body);
         user.password = undefined;
-        return res.send({ user,token: this.createUserToken(user.id) });
+        return res.send({ user, token: this.createUserToken(user.id) });
       }
       catch (err) {
         console.log(err);
