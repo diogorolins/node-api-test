@@ -8,9 +8,9 @@ class UserController{
     return (req, res, next) => {
       console.log('Middlewere token ativado')
       const token_header = req.headers.token;
-      if(!token_header) return res.send({ error: 'Falha na autenticação.'})
+      if(!token_header) return res.status(401).send({ error: 'Falha na autenticação.'})
       jwt.verify(token_header, '123456' , (err, decoded) => {
-        if (err) return res.send({ error: 'Falha na autenticação.'})
+        if (err) return res.status(401).send({ error: 'Falha na autenticação.'})
         return next();
       });
     };
@@ -26,7 +26,7 @@ class UserController{
         const userList = await users.find({});
         res.send(userList);
       } catch (err) {
-        return res.send({ error: 'Erro na consulta de usuários' });
+        return res.status(500).send({ error: 'Erro na consulta de usuários' });
       }
     }
   }
@@ -34,17 +34,17 @@ class UserController{
   createUser(){
     return async (req, res) => {
       const { email, password } = req.body;
-      if (!email || !password) return res.send({ error: 'Dados insufucientes' });
+      if (!email || !password) return res.status(400).send({ error: 'Dados insufucientes' });
 
       try {
-        if (await users.findOne({ email })) return res.send({ error: 'Usuário já cadastrado' });
+        if (await users.findOne({ email })) return res.status(400).send({ error: 'Usuário já cadastrado' });
         const user = await users.create(req.body);
         user.password = undefined;
         return res.send({ user,token: this.createUserToken(user.id) });
       }
       catch (err) {
         console.log(err);
-        return res.send({ error: 'Erro no cadastro do usuário' });
+        return res.status(500).send({ error: 'Erro no cadastro do usuário' });
       }
 
     }
@@ -54,18 +54,18 @@ class UserController{
 
     return async (req, res) => {
       const { email, password } = req.body;
-      if (!email || !password) return res.send({ error: 'Dados insufucientes' });
+      if (!email || !password) return res.status(400).send({ error: 'Dados insufucientes' });
 
       try {
         const user = await users.findOne({ email }).select('+password');
-        if (!await users.findOne({ email }).select('+password')) return res.send({ error: 'Usuário não encontrado' });
-        if (!await bcrypt.compare(password, user.password)) return res.send({ error: 'Usuário não autenticado' });
+        if (!await users.findOne({ email }).select('+password')) return res.status(400).send({ error: 'Usuário não encontrado' });
+        if (!await bcrypt.compare(password, user.password)) return res.status(401).send({ error: 'Usuário não autenticado' });
         user.password = undefined;
         return res.send({ user, token: this.createUserToken(user.id) });
       }
       catch (err) {
         console.log(err);
-        return res.send({ error: 'Erro na autenticação' });
+        return res.status(500).send({ error: 'Erro na autenticação' });
       }
 
     }
