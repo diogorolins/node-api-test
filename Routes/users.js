@@ -7,7 +7,7 @@ router.get('/', userController.listUsers());
 
 router.post('/', userController.createUser());
 
-router.post('/auth', userController.authUser() );
+router.post('/auth', userController.authUser());
 
 module.exports = router;
 

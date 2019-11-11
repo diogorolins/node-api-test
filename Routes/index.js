@@ -1,7 +1,9 @@
 const express = require('express');
 const router = express.Router();
+const UserController = require('../Controllers/UserController');
+const userController = new UserController();
 
-router.get('/', (req,res) => {
+router.get('/', userController.authToken(), (req,res) => {
   return res.send({message: 'Raiz do projeto'});
 })
 
