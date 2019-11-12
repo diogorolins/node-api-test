@@ -27,6 +27,12 @@ class AuthController{
     }
   }
 
+  logOutUser(){
+    return (req, res) => {
+      res.status(200).json({user: null, token:null});
+    }
+  }
+
 }
 
 module.exports = AuthController;

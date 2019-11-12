@@ -25,6 +25,7 @@ class UserController{
         if (await users.findOne({ email })) return res.status(400).send({ error: 'Usuário já cadastrado' });
         const user = await users.create(req.body);
         user.password = undefined;
+        res.location('/users/' + user.id);
         return res.json({ user, token: Token.createUserToken(user.id) });
       }
       catch (err) {
